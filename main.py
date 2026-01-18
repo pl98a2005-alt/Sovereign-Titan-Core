@@ -1,49 +1,52 @@
+# main.py - V1.6 EMERGENCY SHIELD
+import kivy
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
-from kivy.uix.textinput import TextInput
-from kivy.uix.button import Button
-from kivy.uix.spinner import Spinner
 from kivy.core.window import Window
 from kivy.utils import get_color_from_hex
-from kivy.clock import Clock
 import os
+
+# إعداد الشاشة سوداء ملكية
+Window.clearcolor = get_color_from_hex('#000000')
 
 class SovereignEngine(BoxLayout):
     def __init__(self, **kwargs):
-        super().__init__(orientation='vertical', padding=15, spacing=10)
-        Window.clearcolor = get_color_from_hex('#000000')
-        self.FONT = 'font.ttf' if os.path.exists('font.ttf') else None
+        super().__init__(orientation='vertical', padding=20)
+        
+        # عنوان ترحيبي ثابت لا يسبب كراش
+        self.add_widget(Label(
+            text='SOVEREIGN ARCHITECT\n[ SYSTEM ONLINE ]',
+            font_size='25sp',
+            color=get_color_from_hex('#D4AF37'),
+            halign='center'
+        ))
 
-        # واجهة بسيطة في البداية لمنع الكراش
-        self.title = Label(text='SOVEREIGN ARCHITECT', font_size='26sp', color=get_color_from_hex('#D4AF37'), font_name=self.FONT)
-        self.add_widget(self.title)
+        # محاولة فحص المكونات بحذر شديد
+        self.error_log = ""
+        try:
+            import requests
+            import PIL
+            import sqlite3
+            self.add_widget(Label(text="Core Modules: Verified ✅", color=(0, 1, 0, 1)))
+        except Exception as e:
+            self.error_log = str(e)
+            self.add_widget(Label(text=f"Module Missing: {self.error_log[:30]}", color=(1, 0, 0, 1)))
 
-        self.desc_input = TextInput(hint_text='Describe your game...', size_hint_y=0.3, font_name=self.FONT)
-        self.add_widget(self.desc_input)
-
-        self.status = Label(text='AI System: Ready', color=get_color_from_hex('#00FFFF'), font_name=self.FONT)
-        self.add_widget(self.status)
-
-        # الأزرار
-        self.build_btn = Button(text='START ENGINEERING', background_color=get_color_from_hex('#D4AF37'), font_name=self.FONT)
-        self.build_btn.bind(on_press=self.run_ai)
-        self.add_widget(self.build_btn)
-
-        self.clean_btn = Button(text='CLEAN UP', background_color=get_color_from_hex('#444444'), font_name=self.FONT)
-        self.clean_btn.bind(on_press=self.do_clean)
-        self.add_widget(self.clean_btn)
-
-    def run_ai(self, instance):
-        from ai_strategist import factory_pipeline
-        self.status.text = "Sovereign AI is analyzing..."
-        res = factory_pipeline(description=self.desc_input.text)
-        self.status.text = res
-
-    def do_clean(self, instance):
-        self.status.text = "Cleaning... Vault is safe."
+        self.add_widget(Label(
+            text='Ready for Engineering Command...',
+            font_size='14sp',
+            color=(0.5, 0.5, 0.5, 1)
+        ))
 
 class SovereignApp(App):
-    def build(self): return SovereignEngine()
+    def build(self):
+        return SovereignEngine()
 
-if __name__ == '__main__': SovereignApp().run()
+if __name__ == '__main__':
+    try:
+        SovereignApp().run()
+    except Exception as e:
+        # إذا حدث كراش حتى في التشغيل، سيحاول النظام كتابة السبب
+        with open("crash_log.txt", "w") as f:
+            f.write(str(e))
