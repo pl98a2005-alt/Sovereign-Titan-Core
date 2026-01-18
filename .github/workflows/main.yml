@@ -5,7 +5,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04 # استخدام نسخة أكثر استقراراً لأدوات الأندرويد
     steps:
       - uses: actions/checkout@v4
 
@@ -17,28 +17,31 @@ jobs:
       - name: Install System Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential libsqlite3-dev zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev wget zip unzip openjdk-17-jdk ant python3-pip
+          sudo apt-get install -y build-essential libsqlite3-dev zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev wget zip unzip openjdk-17-jdk ant python3-pip autoconf libtool pkg-config
 
       - name: Install Buildozer & Cython
         run: |
           pip install --user --upgrade buildozer Cython==0.29.33
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      - name: Initialize and Fix Spec File
+      - name: Global Factory Reset & Spec Fix
         run: |
-          # التأكد من وجود ملف الإعدادات أو إنشاء واحد احترافي فوراً
-          if [ ! -f buildozer.spec ]; then
-            buildozer init
-          fi
-          # تعديل الصلاحيات والمطلبات لتناسب المصنع العالمي
+          rm -f buildozer.spec
+          buildozer init
+          # ضبط الإعدادات لتكون عالمية (Universal)
+          sed -i 's/package.name = myapp/package.name = sovereign_titan/g' buildozer.spec
+          sed -i 's/package.domain = org.test/package.domain = org.sovereign/g' buildozer.spec
           sed -i 's/requirements = python3,kivy/requirements = python3,kivy,requests,beautifulsoup4,sqlite3/g' buildozer.spec
           sed -i 's/#android.permissions =/android.permissions = INTERNET,WRITE_EXTERNAL_STORAGE,READ_EXTERNAL_STORAGE,MANAGE_EXTERNAL_STORAGE/g' buildozer.spec
+          sed -i 's/android.archs = arm64-v8a, armeabi-v7a/android.archs = arm64-v8a/g' buildozer.spec
+          sed -i 's/#android.accept_sdk_license = False/android.accept_sdk_license = True/g' buildozer.spec
 
       - name: Build Titan Core APK
         run: |
-          # أمر القوة: قبول التراخيص والبناء في خطوة واحدة
-          yes | buildozer -v android debug
-        continue-on-error: false # سنتركه يظهر الخطأ الحقيقي إذا حدث
+          # البناء باستخدام محرك الاستقرار
+          export JAVA_HOME=$JAVA_HOME_17_X64
+          buildozer -v android debug
+        continue-on-error: false
 
       - name: Upload Sovereign Artifact
         if: always()
