@@ -1,90 +1,88 @@
-# main.py - SOVEREIGN ARCHITECT (VERSION 1.1 - GENERATIVE & CLEAN ENGINE)
+# main.py - SOVEREIGN ARCHITECT (DUAL LANGUAGE SYSTEM)
 import kivy
 import os
-import shutil
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
 from kivy.uix.textinput import TextInput
 from kivy.uix.button import Button
+from kivy.uix.spinner import Spinner
 from kivy.core.window import Window
 from kivy.utils import get_color_from_hex
 from ai_strategist import factory_pipeline 
 
-Window.clearcolor = get_color_from_hex('#000000')
+# إعداد الخط العربي (يجب رفعه للمستودع باسم font.ttf)
+FONT_PATH = 'font.ttf' if os.path.exists('font.ttf') else None
 
 class SovereignEngine(BoxLayout):
     def __init__(self, **kwargs):
-        super().__init__(orientation='vertical', padding=20, spacing=15)
+        super().__init__(orientation='vertical', padding=10, spacing=10)
         
-        # العنوان الملكي
-        self.add_widget(Label(
-            text='SOVEREIGN ARCHITECT\nTITAN CORE EDITION',
-            font_size='30sp', color=get_color_from_hex('#D4AF37'),
-            halign='center'
-        ))
+        # 1. القائمة العلوية لاختيار اللغة
+        self.top_bar = BoxLayout(size_hint_y=0.1)
+        self.lang_spinner = Spinner(
+            text='Language / اللغة',
+            values=('English', 'العربية'),
+            background_color=get_color_from_hex('#D4AF37'),
+            color=(0,0,0,1)
+        )
+        self.lang_spinner.bind(text=self.switch_language)
+        self.top_bar.add_widget(self.lang_spinner)
+        self.add_widget(self.top_bar)
 
-        # مدخلات الوصف
+        # 2. النصوص القابلة للتغيير
+        self.title_label = Label(
+            text='SOVEREIGN ARCHITECT',
+            font_size='28sp', color=get_color_from_hex('#D4AF37'),
+            font_name=FONT_PATH
+        )
+        self.add_widget(self.title_label)
+
         self.description = TextInput(
-            hint_text='Write your game description here...', 
+            hint_text='Describe your game...', 
             background_color=get_color_from_hex('#1A1A1A'),
             foreground_color=get_color_from_hex('#FFFFFF'),
-            multiline=True, size_hint_y=0.4
+            multiline=True, size_hint_y=0.4, font_name=FONT_PATH
         )
         self.add_widget(self.description)
 
         self.ai_status = Label(
-            text='Status: Ready for the Sovereign Commands...',
-            color=get_color_from_hex('#00FFFF')
+            text='Status: Ready', color=get_color_from_hex('#00FFFF'), font_name=FONT_PATH
         )
         self.add_widget(self.ai_status)
 
-        # أزرار التحكم
-        buttons_layout = BoxLayout(orientation='horizontal', size_hint_y=0.2, spacing=10)
+        # 3. أزرار التحكم
+        self.btns_layout = BoxLayout(orientation='horizontal', size_hint_y=0.15, spacing=10)
+        self.build_btn = Button(text='ENGINEERING', background_color=get_color_from_hex('#D4AF37'), color=(0,0,0,1))
+        self.clean_btn = Button(text='CLEAN UP', background_color=get_color_from_hex('#444444'))
         
-        self.build_btn = Button(
-            text='START ENGINEERING',
-            background_color=get_color_from_hex('#D4AF37'),
-            color=get_color_from_hex('#000000'),
-            bold=True
-        )
         self.build_btn.bind(on_press=self.run_factory)
-        
-        self.clean_btn = Button(
-            text='CLEAN UP',
-            background_color=get_color_from_hex('#757575'),
-            color=get_color_from_hex('#FFFFFF')
-        )
         self.clean_btn.bind(on_press=self.perform_cleanup)
         
-        buttons_layout.add_widget(self.build_btn)
-        buttons_layout.add_widget(self.clean_btn)
-        self.add_widget(buttons_layout)
+        self.btns_layout.add_widget(self.build_btn)
+        self.btns_layout.add_widget(self.clean_btn)
+        self.add_widget(self.btns_layout)
+
+    def switch_language(self, spinner, text):
+        """تغيير لغة الواجهة فوراً"""
+        if text == 'العربية':
+            self.title_label.text = 'المعماري السيادي'
+            self.description.hint_text = 'صف لعبتك هنا...'
+            self.ai_status.text = 'الحالة: جاهز للأوامر'
+            self.build_btn.text = 'بدء الهندسة'
+            self.clean_btn.text = 'تنظيف'
+        else:
+            self.title_label.text = 'SOVEREIGN ARCHITECT'
+            self.description.hint_text = 'Describe your game...'
+            self.ai_status.text = 'Status: Ready'
+            self.build_btn.text = 'ENGINEERING'
+            self.clean_btn.text = 'CLEAN UP'
 
     def run_factory(self, instance):
-        desc = self.description.text
-        if desc:
-            self.ai_status.text = "AI is Analyzing and Generating the Engine..."
-            result = factory_pipeline(desc)
-            self.ai_status.text = f"Result: {result}"
+        # الـ AI يعالج اللغتين تلقائياً كما ذكرت يا شريكي
+        result = factory_pipeline(self.description.text)
+        self.ai_status.text = result
 
     def perform_cleanup(self, instance):
-        """نظام التنظيف الذكي: يحذف الزوائد ويستثني المطلوب"""
-        try:
-            # حذف مجلدات البناء المؤقتة فقط
-            temp_folders = ['.buildozer', 'bin']
-            for folder in temp_folders:
-                if os.path.exists(folder):
-                    # ملاحظة: لن يتم مسح vault أو الأكواد المكتوبة
-                    self.ai_status.text = f"Cleaning {folder}..."
-                    # shutil.rmtree(folder) # فعل هذا السطر فقط عند الحاجة لتفريغ مساحة ضخمة
-            self.ai_status.text = "Cleanup Complete. Core Files Secured."
-        except Exception as e:
-            self.ai_status.text = f"Cleanup Error: {str(e)}"
-
-class SovereignApp(App):
-    def build(self):
-        return SovereignEngine()
-
-if __name__ == '__main__':
-    SovereignApp().run()
+        # استثناء الملفات المطلوبة مثل الخبرات المكتسبة
+        self.ai_status.text = "Cleaning... / جاري التنظيف..."
