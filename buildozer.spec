@@ -3,15 +3,16 @@ title = Sovereign Titan
 package.name = sovereigntitan
 package.domain = org.sovereign
 source.dir = .
-source.include_exts = py,png,jpg,kv,atlas,ttf
-version = 1.5
+source.include_exts = py,png,jpg,ttf,kv
+version = 1.7
 
-# هذه هي المتطلبات التي أضفنا لها Pillow و Android و Requests
-requirements = python3,kivy,requests,sqlite3,pillow,android
+# المتطلبات النهائية المصححة
+requirements = python3,kivy==2.2.1,requests,sqlite3,Pillow,android
 
 orientation = portrait
 fullscreen = 1
-android.permissions = WRITE_EXTERNAL_STORAGE, READ_EXTERNAL_STORAGE, INTERNET
+android.permissions = INTERNET,WRITE_EXTERNAL_STORAGE,READ_EXTERNAL_STORAGE
+android.api = 31
 
 [buildozer]
 log_level = 2
