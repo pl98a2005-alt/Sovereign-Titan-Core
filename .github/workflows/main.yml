@@ -1,4 +1,5 @@
 name: Sovereign Build Engine
+
 on:
   push:
     branches: [ main ]
@@ -26,29 +27,32 @@ jobs:
 
       - name: Force Accept All Licenses
         run: |
-          # هذه هي الضربة القاضية: قبول كافة التراخيص في كافة المسارات الممكنة
           mkdir -p $HOME/.android
           touch $HOME/.android/repositories.cfg
-          # تحميل أدوات السدك وقبولها قبل بدء البناء
+          # قبول التراخيص قبل بدء عملية البناء
           yes | buildozer android signatures || true
           
-      - name: Prepare Sovereign Spec
+      - name: Protect and Prepare Sovereign Spec
         run: |
-          rm -f buildozer.spec
-          buildozer init
-          # إجبار المصنع على استخدام إصدار مستقر (33) بدلاً من 36 المتعب
-          sed -i 's/package.name = myapp/package.name = sovereign_titan/g' buildozer.spec
-          sed -i 's/requirements = python3,kivy/requirements = python3,kivy,requests,beautifulsoup4,sqlite3/g' buildozer.spec
-          sed -i 's/android.api = 31/android.api = 33/g' buildozer.spec
+          # [2026-01-18] تعديل جوهري: لا تحذف ملف buildozer.spec الخاص بك!
+          # إذا لم يكن الملف موجوداً، قم بإنشائه، وإذا كان موجوداً، حافظ عليه.
+          if [ ! -f buildozer.spec ]; then 
+            buildozer init
+          fi
+          
+          # تفعيل قبول التراخيص داخل الملف دون مسح المتطلبات (Requirements)
           sed -i 's/#android.accept_sdk_license = False/android.accept_sdk_license = True/g' buildozer.spec
-          # أمر سري لإجبار Buildozer على قبول التراخيص داخلياً
-          echo "android.accept_sdk_license = True" >> buildozer.spec
+          
+          # تأكيد إضافي لضمان قبول التراخيص
+          if ! grep -q "android.accept_sdk_license = True" buildozer.spec; then
+            echo "android.accept_sdk_license = True" >> buildozer.spec
+          fi
 
       - name: Build Titan Core APK
         run: |
-          # تشغيل البناء مع تصفية الأخطاء
+          # تصدير مسار جافا الصحيح
           export JAVA_HOME=$JAVA_HOME_17_X64
-          # استخدام 'yes' مع أمر البناء لضمان تخطي أي سؤال مفاجئ
+          # البدء في بناء الـ APK مع إظهار التفاصيل وإصلاح التراخيص تلقائياً
           yes | buildozer -v android debug
         continue-on-error: false
 
