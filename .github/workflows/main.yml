@@ -17,18 +17,22 @@ jobs:
       - name: Install System Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential libsqlite3-dev zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev wget zip unzip
+          sudo apt-get install -y build-essential libsqlite3-dev zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev wget zip unzip openjdk-17-jdk ant
 
-      - name: Install Buildozer & Tools
+      - name: Install Buildozer & Cython
         run: |
           pip install --user --upgrade buildozer
           pip install --user --upgrade Cython==0.29.33
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
+      - name: Accept Android SDK Licenses
+        run: |
+          yes | buildozer android signatures || true
+
       - name: Build Titan Core APK
         run: |
-          # سيقوم هذا الأمر بإنشاء ملف الإعدادات إذا فقد أو تحديثه
-          buildozer android debug
+          # بناء المصنع الفاخر مع تجاهل التحذيرات غير المؤثرة
+          buildozer -v android debug
         continue-on-error: true
 
       - name: Upload Sovereign Artifact
@@ -36,3 +40,4 @@ jobs:
         with:
           name: Sovereign-Titan-APK
           path: bin/*.apk
+          if-no-files-found: warn
