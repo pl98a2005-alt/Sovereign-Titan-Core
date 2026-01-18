@@ -24,30 +24,32 @@ jobs:
           pip install --user --upgrade buildozer Cython==0.29.33
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      - name: Force Accept Licenses & Install Build-Tools
+      - name: Force Accept All Licenses
         run: |
-          # تنزيل سدك مانجر وقبول التراخيص إجبارياً
+          # هذه هي الضربة القاضية: قبول كافة التراخيص في كافة المسارات الممكنة
           mkdir -p $HOME/.android
           touch $HOME/.android/repositories.cfg
+          # تحميل أدوات السدك وقبولها قبل بدء البناء
           yes | buildozer android signatures || true
           
       - name: Prepare Sovereign Spec
         run: |
           rm -f buildozer.spec
           buildozer init
-          # ضبط الإعدادات للعمل على أندرويد 13+ (API 33) لضمان القوة
+          # إجبار المصنع على استخدام إصدار مستقر (33) بدلاً من 36 المتعب
           sed -i 's/package.name = myapp/package.name = sovereign_titan/g' buildozer.spec
           sed -i 's/requirements = python3,kivy/requirements = python3,kivy,requests,beautifulsoup4,sqlite3/g' buildozer.spec
-          sed -i 's/#android.accept_sdk_license = False/android.accept_sdk_license = True/g' buildozer.spec
           sed -i 's/android.api = 31/android.api = 33/g' buildozer.spec
-          sed -i 's/android.minapi = 21/android.minapi = 24/g' buildozer.spec
+          sed -i 's/#android.accept_sdk_license = False/android.accept_sdk_license = True/g' buildozer.spec
+          # أمر سري لإجبار Buildozer على قبول التراخيص داخلياً
+          echo "android.accept_sdk_license = True" >> buildozer.spec
 
       - name: Build Titan Core APK
         run: |
-          # تنفيذ البناء مع محرك التخطي
+          # تشغيل البناء مع تصفية الأخطاء
           export JAVA_HOME=$JAVA_HOME_17_X64
-          # استخدام ميزة التحديث التلقائي للأدوات
-          buildozer -v android debug
+          # استخدام 'yes' مع أمر البناء لضمان تخطي أي سؤال مفاجئ
+          yes | buildozer -v android debug
         continue-on-error: false
 
       - name: Upload Sovereign Artifact
