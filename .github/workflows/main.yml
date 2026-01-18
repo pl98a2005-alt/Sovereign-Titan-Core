@@ -17,27 +17,32 @@ jobs:
       - name: Install System Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential libsqlite3-dev zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev wget zip unzip openjdk-17-jdk ant
+          sudo apt-get install -y build-essential libsqlite3-dev zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev wget zip unzip openjdk-17-jdk ant python3-pip
 
       - name: Install Buildozer & Cython
         run: |
-          pip install --user --upgrade buildozer
-          pip install --user --upgrade Cython==0.29.33
+          pip install --user --upgrade buildozer Cython==0.29.33
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      - name: Accept Android SDK Licenses
+      - name: Initialize and Fix Spec File
         run: |
-          yes | buildozer android signatures || true
+          # التأكد من وجود ملف الإعدادات أو إنشاء واحد احترافي فوراً
+          if [ ! -f buildozer.spec ]; then
+            buildozer init
+          fi
+          # تعديل الصلاحيات والمطلبات لتناسب المصنع العالمي
+          sed -i 's/requirements = python3,kivy/requirements = python3,kivy,requests,beautifulsoup4,sqlite3/g' buildozer.spec
+          sed -i 's/#android.permissions =/android.permissions = INTERNET,WRITE_EXTERNAL_STORAGE,READ_EXTERNAL_STORAGE,MANAGE_EXTERNAL_STORAGE/g' buildozer.spec
 
       - name: Build Titan Core APK
         run: |
-          # بناء المصنع الفاخر مع تجاهل التحذيرات غير المؤثرة
-          buildozer -v android debug
-        continue-on-error: true
+          # أمر القوة: قبول التراخيص والبناء في خطوة واحدة
+          yes | buildozer -v android debug
+        continue-on-error: false # سنتركه يظهر الخطأ الحقيقي إذا حدث
 
       - name: Upload Sovereign Artifact
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: Sovereign-Titan-APK
           path: bin/*.apk
-          if-no-files-found: warn
