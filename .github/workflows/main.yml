@@ -5,7 +5,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04 # استخدام نسخة أكثر استقراراً لأدوات الأندرويد
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
 
@@ -24,22 +24,29 @@ jobs:
           pip install --user --upgrade buildozer Cython==0.29.33
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      - name: Global Factory Reset & Spec Fix
+      - name: Force Accept Licenses & Install Build-Tools
+        run: |
+          # تنزيل سدك مانجر وقبول التراخيص إجبارياً
+          mkdir -p $HOME/.android
+          touch $HOME/.android/repositories.cfg
+          yes | buildozer android signatures || true
+          
+      - name: Prepare Sovereign Spec
         run: |
           rm -f buildozer.spec
           buildozer init
-          # ضبط الإعدادات لتكون عالمية (Universal)
+          # ضبط الإعدادات للعمل على أندرويد 13+ (API 33) لضمان القوة
           sed -i 's/package.name = myapp/package.name = sovereign_titan/g' buildozer.spec
-          sed -i 's/package.domain = org.test/package.domain = org.sovereign/g' buildozer.spec
           sed -i 's/requirements = python3,kivy/requirements = python3,kivy,requests,beautifulsoup4,sqlite3/g' buildozer.spec
-          sed -i 's/#android.permissions =/android.permissions = INTERNET,WRITE_EXTERNAL_STORAGE,READ_EXTERNAL_STORAGE,MANAGE_EXTERNAL_STORAGE/g' buildozer.spec
-          sed -i 's/android.archs = arm64-v8a, armeabi-v7a/android.archs = arm64-v8a/g' buildozer.spec
           sed -i 's/#android.accept_sdk_license = False/android.accept_sdk_license = True/g' buildozer.spec
+          sed -i 's/android.api = 31/android.api = 33/g' buildozer.spec
+          sed -i 's/android.minapi = 21/android.minapi = 24/g' buildozer.spec
 
       - name: Build Titan Core APK
         run: |
-          # البناء باستخدام محرك الاستقرار
+          # تنفيذ البناء مع محرك التخطي
           export JAVA_HOME=$JAVA_HOME_17_X64
+          # استخدام ميزة التحديث التلقائي للأدوات
           buildozer -v android debug
         continue-on-error: false
 
