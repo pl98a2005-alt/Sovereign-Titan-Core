@@ -4,9 +4,9 @@ package.name = sovereigntitan
 package.domain = org.sovereign
 source.dir = .
 source.include_exts = py,png,jpg,ttf,kv
-version = 1.7
+version = 1.8
 
-# المتطلبات النهائية المصححة
+# المتطلبات النهائية المصححة لضمان عمل الرؤية والذكاء
 requirements = python3,kivy==2.2.1,requests,sqlite3,Pillow,android
 
 orientation = portrait
