@@ -7,10 +7,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4  # تم التحديث للإصدار الرابع
 
       - name: Setup Architecture Environment
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5 # تم التحديث للإصدار الخامس
         with:
           python-version: '3.10'
 
@@ -20,14 +20,13 @@ jobs:
           sudo apt-get install -y build-essential libsqlite3-dev zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev wget
 
       - name: Build Titan Core APK
-        uses: ArtemGrinev/buildozer-action@v1
+        uses: pokedal/buildozer-action@v2 # استخدام نسخة محدثة ومستقرة من Buildozer
         with:
-          buildozer_version: master
           command: buildozer android debug
           repository_root: .
 
       - name: Upload Sovereign Artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4 # تم التحديث للإصدار الرابع (حل مشكلة Error)
         with:
           name: Sovereign-Titan-APK
           path: bin/*.apk
