@@ -9,25 +9,27 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Architecture Environment
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
-      - name: Install Build Dependencies
+      - name: Install System Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential libsqlite3-dev zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev wget
+          sudo apt-get install -y build-essential libsqlite3-dev zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev wget zip unzip
 
-      - name: Build Titan Core APK
-        uses: actions/python-versions@v3 # استخدام بيئة بايثون المعززة
-        
-      - name: Build with Buildozer
+      - name: Install Buildozer & Tools
         run: |
           pip install --user --upgrade buildozer
           pip install --user --upgrade Cython==0.29.33
-          export PATH=$PATH:$HOME/.local/bin
-          buildozer android debug || true # سيستمر حتى لو حدث خطأ طفيف لبدء التحليل
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Build Titan Core APK
+        run: |
+          # سيقوم هذا الأمر بإنشاء ملف الإعدادات إذا فقد أو تحديثه
+          buildozer android debug
+        continue-on-error: true
 
       - name: Upload Sovereign Artifact
         uses: actions/upload-artifact@v4
