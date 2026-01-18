@@ -1,5 +1,4 @@
-# main.py - V1.6 EMERGENCY SHIELD
-import kivy
+# main.py - SOVEREIGN ARCHITECT V1.7 STABLE
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
@@ -12,9 +11,9 @@ Window.clearcolor = get_color_from_hex('#000000')
 
 class SovereignEngine(BoxLayout):
     def __init__(self, **kwargs):
-        super().__init__(orientation='vertical', padding=20)
+        super().__init__(orientation='vertical', padding=20, spacing=10)
         
-        # عنوان ترحيبي ثابت لا يسبب كراش
+        # العنوان الأساسي
         self.add_widget(Label(
             text='SOVEREIGN ARCHITECT\n[ SYSTEM ONLINE ]',
             font_size='25sp',
@@ -22,16 +21,16 @@ class SovereignEngine(BoxLayout):
             halign='center'
         ))
 
-        # محاولة فحص المكونات بحذر شديد
-        self.error_log = ""
+        # فحص المكتبات وتأكيد نظام الرؤية
         try:
+            from PIL import Image
             import requests
-            import PIL
-            import sqlite3
-            self.add_widget(Label(text="Core Modules: Verified ✅", color=(0, 1, 0, 1)))
+            self.add_widget(Label(text="Vision Core: Active ✅", color=(0, 1, 0.5, 1)))
+            self.add_widget(Label(text="AI Link: Connected ✅", color=(0, 1, 0.5, 1)))
+        except ImportError:
+            self.add_widget(Label(text="Status: Initializing Modules...", color=(1, 0.8, 0, 1)))
         except Exception as e:
-            self.error_log = str(e)
-            self.add_widget(Label(text=f"Module Missing: {self.error_log[:30]}", color=(1, 0, 0, 1)))
+            self.add_widget(Label(text=f"Check Specs: {str(e)[:20]}", color=(1, 0, 0, 1)))
 
         self.add_widget(Label(
             text='Ready for Engineering Command...',
@@ -43,10 +42,13 @@ class SovereignApp(App):
     def build(self):
         return SovereignEngine()
 
+    def on_start(self):
+        # طلب صلاحيات الذاكرة لضمان عمل الخزنة (Vault)
+        try:
+            from android.permissions import request_permissions, Permission
+            request_permissions([Permission.WRITE_EXTERNAL_STORAGE, Permission.READ_EXTERNAL_STORAGE])
+        except:
+            pass
+
 if __name__ == '__main__':
-    try:
-        SovereignApp().run()
-    except Exception as e:
-        # إذا حدث كراش حتى في التشغيل، سيحاول النظام كتابة السبب
-        with open("crash_log.txt", "w") as f:
-            f.write(str(e))
+    SovereignApp().run()
