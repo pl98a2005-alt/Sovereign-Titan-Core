@@ -1,61 +1,38 @@
 name: Sovereign Build Engine
-
 on:
   push:
     branches: [ main ]
-
 jobs:
   build:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
-
       - name: Install System Dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential libsqlite3-dev zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev wget zip unzip openjdk-17-jdk ant python3-pip autoconf libtool pkg-config
-
       - name: Install Buildozer & Cython
         run: |
           pip install --user --upgrade buildozer Cython==0.29.33
           echo "$HOME/.local/bin" >> $GITHUB_PATH
-
       - name: Force Accept All Licenses
         run: |
           mkdir -p $HOME/.android
           touch $HOME/.android/repositories.cfg
-          # قبول التراخيص قبل بدء عملية البناء
           yes | buildozer android signatures || true
-          
-      - name: Protect and Prepare Sovereign Spec
+      - name: Use Sovereign Spec
         run: |
-          # [2026-01-18] تعديل جوهري: لا تحذف ملف buildozer.spec الخاص بك!
-          # إذا لم يكن الملف موجوداً، قم بإنشائه، وإذا كان موجوداً، حافظ عليه.
-          if [ ! -f buildozer.spec ]; then 
-            buildozer init
-          fi
-          
-          # تفعيل قبول التراخيص داخل الملف دون مسح المتطلبات (Requirements)
+          # حماية ملف الـ Spec الخاص بك [2026-01-18]
+          if [ ! -f buildozer.spec ]; then buildozer init; fi
           sed -i 's/#android.accept_sdk_license = False/android.accept_sdk_license = True/g' buildozer.spec
-          
-          # تأكيد إضافي لضمان قبول التراخيص
-          if ! grep -q "android.accept_sdk_license = True" buildozer.spec; then
-            echo "android.accept_sdk_license = True" >> buildozer.spec
-          fi
-
       - name: Build Titan Core APK
         run: |
-          # تصدير مسار جافا الصحيح
           export JAVA_HOME=$JAVA_HOME_17_X64
-          # البدء في بناء الـ APK مع إظهار التفاصيل وإصلاح التراخيص تلقائياً
           yes | buildozer -v android debug
-        continue-on-error: false
-
       - name: Upload Sovereign Artifact
         if: always()
         uses: actions/upload-artifact@v4
