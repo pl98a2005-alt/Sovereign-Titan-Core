@@ -1,0 +1,33 @@
+name: Sovereign Build Engine
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Architecture Environment
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.10'
+
+      - name: Install Build Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libsqlite3-dev zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev wget
+
+      - name: Build Titan Core APK
+        uses: ArtemGrinev/buildozer-action@v1
+        with:
+          buildozer_version: master
+          command: buildozer android debug
+          repository_root: .
+
+      - name: Upload Sovereign Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: Sovereign-Titan-APK
+          path: bin/*.apk
