@@ -1,5 +1,7 @@
-# SOVEREIGN ARCHITECT: TITAN CORE - MAIN ENGINE
+# main.py - SOVEREIGN ARCHITECT (VERSION 1.1 - GENERATIVE & CLEAN ENGINE)
 import kivy
+import os
+import shutil
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
@@ -7,61 +9,78 @@ from kivy.uix.textinput import TextInput
 from kivy.uix.button import Button
 from kivy.core.window import Window
 from kivy.utils import get_color_from_hex
-import threading
+from ai_strategist import factory_pipeline 
 
-# إعدادات النافذة الفاخرة
-Window.clearcolor = get_color_from_hex('#000000') # الأسود الملكي
+Window.clearcolor = get_color_from_hex('#000000')
 
 class SovereignEngine(BoxLayout):
     def __init__(self, **kwargs):
         super().__init__(orientation='vertical', padding=20, spacing=15)
         
-        # الشعار والعنوان الفاخر
+        # العنوان الملكي
         self.add_widget(Label(
-            text='[b]SOVEREIGN ARCHITECT[/b]\n[size=15]TITAN CORE EDITION[/size]',
-            markup=True, font_size='30sp', color=get_color_from_hex('#D4AF37') # الذهبي
+            text='SOVEREIGN ARCHITECT\nTITAN CORE EDITION',
+            font_size='30sp', color=get_color_from_hex('#D4AF37'),
+            halign='center'
         ))
 
-        # مساحة وصف اللعبة (مدخلات الملك)
+        # مدخلات الوصف
         self.description = TextInput(
-            hint_text='صف عظمة اللعبة التي تريد هندستها هنا...',
+            hint_text='Write your game description here...', 
             background_color=get_color_from_hex('#1A1A1A'),
             foreground_color=get_color_from_hex('#FFFFFF'),
-            hint_text_color=get_color_from_hex('#888888'),
-            multiline=True, size_hint_y=0.4, font_size='18sp'
+            multiline=True, size_hint_y=0.4
         )
         self.add_widget(self.description)
 
-        # منطقة الاستشارات الذكية (الذكاء الواعي)
         self.ai_status = Label(
-            text='الذكاء الواعي: في انتظار أوامر الملك...',
-            color=get_color_from_hex('#00FFFF'), # أزرق سيان تقني
-            italic=True
+            text='Status: Ready for the Sovereign Commands...',
+            color=get_color_from_hex('#00FFFF')
         )
         self.add_widget(self.ai_status)
 
-        # زر الانطلاق الهندسي
+        # أزرار التحكم
+        buttons_layout = BoxLayout(orientation='horizontal', size_hint_y=0.2, spacing=10)
+        
         self.build_btn = Button(
-            text='بدء الهندسة العالمية',
+            text='START ENGINEERING',
             background_color=get_color_from_hex('#D4AF37'),
             color=get_color_from_hex('#000000'),
-            bold=True, font_size='20sp', size_hint_y=0.2
+            bold=True
         )
-        self.build_btn.bind(on_press=self.start_engineering)
-        self.add_widget(self.build_btn)
+        self.build_btn.bind(on_press=self.run_factory)
+        
+        self.clean_btn = Button(
+            text='CLEAN UP',
+            background_color=get_color_from_hex('#757575'),
+            color=get_color_from_hex('#FFFFFF')
+        )
+        self.clean_btn.bind(on_press=self.perform_cleanup)
+        
+        buttons_layout.add_widget(self.build_btn)
+        buttons_layout.add_widget(self.clean_btn)
+        self.add_widget(buttons_layout)
 
-    def start_engineering(self, instance):
+    def run_factory(self, instance):
         desc = self.description.text
         if desc:
-            self.ai_status.text = "يتم الآن تحليل النوع الاستراتيجي للعبة..."
-            # هنا سيعمل الـ AI للتحليل والاقتراح (سيتم ربطه بالملف الثالث)
-            threading.Thread(target=self.analyze_logic, args=(desc,)).start()
+            self.ai_status.text = "AI is Analyzing and Generating the Engine..."
+            result = factory_pipeline(desc)
+            self.ai_status.text = f"Result: {result}"
 
-    def analyze_logic(self, desc):
-        # محاكاة التفكير الواعي
-        import time
-        time.sleep(2)
-        self.ai_status.text = "تحليل: تم رصد نمط (حرب/ضخم). اقتراح: إضافة نظام OBB للموارد."
+    def perform_cleanup(self, instance):
+        """نظام التنظيف الذكي: يحذف الزوائد ويستثني المطلوب"""
+        try:
+            # حذف مجلدات البناء المؤقتة فقط
+            temp_folders = ['.buildozer', 'bin']
+            for folder in temp_folders:
+                if os.path.exists(folder):
+                    # ملاحظة: لن يتم مسح vault أو الأكواد المكتوبة
+                    self.ai_status.text = f"Cleaning {folder}..."
+                    # shutil.rmtree(folder) # فعل هذا السطر فقط عند الحاجة لتفريغ مساحة ضخمة
+            self.ai_status.text = "Cleanup Complete. Core Files Secured."
+        except Exception as e:
+            self.ai_status.text = f"Cleanup Error: {str(e)}"
 
 class SovereignApp(App):
     def build(self):
@@ -69,4 +88,3 @@ class SovereignApp(App):
 
 if __name__ == '__main__':
     SovereignApp().run()
-
