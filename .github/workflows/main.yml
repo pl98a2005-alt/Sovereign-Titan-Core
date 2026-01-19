@@ -2,7 +2,7 @@ name: Build Sovereign Titan APK
 
 on:
   push:
-    branches: [ "main" ] # سيعمل البناء عند كل عملية رفع كود للفرع الرئيسي
+    branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
 
@@ -12,10 +12,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4 # تحديث للإصدار 4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5 # تحديث للإصدار 5
         with:
           python-version: '3.9'
 
@@ -50,13 +50,12 @@ jobs:
 
       - name: Build with Buildozer
         run: |
-          # إضافة مسار البايثون المحلي
           export PATH=$PATH:$HOME/.local/bin
-          # تشغيل عملية البناء (سيقوم بتحميل الـ Android SDK و NDK تلقائياً)
-          buildozer android debug
+          # استخدام yes لإعطاء موافقة تلقائية على شروط SDK/NDK
+          yes | buildozer android debug
 
       - name: Upload APK Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4 # هذا هو التحديث المطلوب لحل المشكلة (v4)
         with:
           name: SovereignTitan-Package
           path: bin/*.apk
