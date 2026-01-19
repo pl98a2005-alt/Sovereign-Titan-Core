@@ -1,0 +1,6 @@
+kivymd
+kivy
+aiohttp
+pyyaml
+requests
+beautifulsoup4
