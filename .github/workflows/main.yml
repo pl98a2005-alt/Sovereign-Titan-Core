@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04 # استخدمنا إصداراً أكثر استقراراً
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout code
@@ -17,36 +17,32 @@ jobs:
         with:
           python-version: '3.9'
 
-      - name: Install System Dependencies
+      - name: Fix and Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y \
+          # تثبيت المكتبة التي سببت المشكلة أولاً بشكل منفصل
+          sudo apt-get install -y libunwind-dev
+          # تثبيت باقي المكتبات مع استخدام -f لإصلاح أي تعارض تلقائياً
+          sudo apt-get install -y -f \
             build-essential git python3-dev ffmpeg libsdl2-dev libsdl2-image-dev \
             libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev libswscale-dev \
             libavformat-dev libavcodec-dev zlib1g-dev libgstreamer1.0-dev \
             gstreamer1.0-plugins-base gstreamer1.0-plugins-good libsqlite3-dev \
-            libffi-dev libssl-dev
+            libffi-dev libssl-dev expect
 
-      - name: Install Buildozer and Cython
+      - name: Install Python tools
         run: |
-          pip install --user --upgrade buildozer
-          pip install --user --upgrade Cython==0.29.33 setuptools
+          pip install --user --upgrade buildozer Cython==0.29.33 setuptools
 
-      - name: Configure Android SDK and Build
+      - name: Build with Buildozer
         run: |
           export PATH=$PATH:$HOME/.local/bin
-          # إجبار النظام على قبول كافة التراخيص قبل البدء
           mkdir -p ~/.android
           touch ~/.android/repositories.cfg
-          # استخدام سكريبت داخلي لتجنب توقف التحميل
-          expect -c "
-          spawn buildozer -v android debug
-          expect \"Do you agree to the terms and conditions?\"
-          send \"y\r\"
-          interact
-          " || yes | buildozer -v android debug
+          # استخدام أمر مباشر وأكثر استقراراً للموافقة على التراخيص
+          yes | buildozer -v android debug
         env:
-          # استخدام الـ SDK المثبت مسبقاً في GitHub لتوفير الوقت وتجنب خطأ 502
+          # استخدام المسارات الافتراضية للـ SDK المثبت في GitHub لضمان السرعة
           ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
           ANDROID_NDK_ROOT: /usr/local/lib/android/sdk/ndk-bundle
 
