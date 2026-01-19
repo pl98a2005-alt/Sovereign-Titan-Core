@@ -1,7 +1,0 @@
-kivy==2.2.1
-kivymd==1.1.1
-requests==2.31.0
-arabic-reshaper==3.0.0
-python-bidi==0.5.2
-beautifulsoup4==4.12.2
-pymunk==6.7.1
