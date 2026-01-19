@@ -1,4 +1,4 @@
-name: Sovereign_Titan_Complete_Production
+name: Sovereign_Titan_Final_Success
 on: 
   push:
     branches: [ main ]
@@ -19,33 +19,28 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: 🧠 Install Ollama & Phi-3 (Lighter AI)
-        run: |
-          curl -fsSL https://ollama.com/install.sh | sh
-          ollama serve & 
-          sleep 30
-          ollama pull phi3:mini # استخدام نموذج أصغر لضمان عدم انهيار السيرفر
-
       - name: 📦 Install Dependencies
         run: |
-          pip install -r requirements.txt
-          pip install buildozer cython
+          pip install requests beautifulsoup4 pyyaml kivymd kivy buildozer cython
 
-      - name: 🛰️ Run Sovereign Factory
+      - name: 🛰️ Run Sovereign Factory (Research & Design)
         run: python main.py
 
       - name: 🛠️ Build Android APK
         run: |
-          # تأكد من وجود ملف buildozer.spec في مستودعك
+          # بناء ملف APK سريع
           if [ -f buildozer.spec ]; then
             yes | buildozer -v android debug
           else
-            echo "buildozer.spec not found, skipping APK build step."
+            echo "No spec file, skipping APK..."
           fi
         continue-on-error: true
 
-      - name: 👑 Upload Ready APK
+      - name: 👑 Upload Result
         uses: actions/upload-artifact@v4
         with:
-          name: Sovereign_Titan_Game_APK
-          path: bin/*.apk
+          name: Sovereign_Titan_Package
+          path: |
+            games/
+            concepts/
+            bin/*.apk
