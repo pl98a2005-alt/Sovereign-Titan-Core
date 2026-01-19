@@ -1,41 +1,62 @@
-name: Sovereign Build Engine
+name: Build Sovereign Titan APK
+
 on:
   push:
-    branches: [ main ]
+    branches: [ "main" ] # سيعمل البناء عند كل عملية رفع كود للفرع الرئيسي
+  pull_request:
+    branches: [ "main" ]
+
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v3
+
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
-      - name: Install System Dependencies
+          python-version: '3.9'
+
+      - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential libsqlite3-dev zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev wget zip unzip openjdk-17-jdk ant python3-pip autoconf libtool pkg-config
-      - name: Install Buildozer & Cython
+          sudo apt-get install -y \
+            build-essential \
+            git \
+            python3-dev \
+            ffmpeg \
+            libsdl2-dev \
+            libsdl2-image-dev \
+            libsdl2-mixer-dev \
+            libsdl2-ttf-dev \
+            libportmidi-dev \
+            libswscale-dev \
+            libavformat-dev \
+            libavcodec-dev \
+            zlib1g-dev \
+            libgstreamer1.0-dev \
+            gstreamer1.0-plugins-base \
+            gstreamer1.0-plugins-good \
+            libsqlite3-dev \
+            libffi-dev \
+            libssl-dev
+
+      - name: Install Buildozer
         run: |
-          pip install --user --upgrade buildozer Cython==0.29.33
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
-      - name: Force Accept All Licenses
+          pip install --user --upgrade buildozer
+          pip install --user --upgrade Cython==0.29.33
+
+      - name: Build with Buildozer
         run: |
-          mkdir -p $HOME/.android
-          touch $HOME/.android/repositories.cfg
-          yes | buildozer android signatures || true
-      - name: Use Sovereign Spec
-        run: |
-          # حماية ملف الـ Spec الخاص بك [2026-01-18]
-          if [ ! -f buildozer.spec ]; then buildozer init; fi
-          sed -i 's/#android.accept_sdk_license = False/android.accept_sdk_license = True/g' buildozer.spec
-      - name: Build Titan Core APK
-        run: |
-          export JAVA_HOME=$JAVA_HOME_17_X64
-          yes | buildozer -v android debug
-      - name: Upload Sovereign Artifact
-        if: always()
-        uses: actions/upload-artifact@v4
+          # إضافة مسار البايثون المحلي
+          export PATH=$PATH:$HOME/.local/bin
+          # تشغيل عملية البناء (سيقوم بتحميل الـ Android SDK و NDK تلقائياً)
+          buildozer android debug
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v3
         with:
-          name: Sovereign-Titan-APK
+          name: SovereignTitan-Package
           path: bin/*.apk
