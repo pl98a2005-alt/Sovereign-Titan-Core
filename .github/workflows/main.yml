@@ -12,50 +12,42 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4 # تحديث للإصدار 4
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v5 # تحديث للإصدار 5
+        uses: actions/setup-python@v5
         with:
           python-version: '3.9'
 
-      - name: Install dependencies
+      - name: Install system dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            build-essential \
-            git \
-            python3-dev \
-            ffmpeg \
-            libsdl2-dev \
-            libsdl2-image-dev \
-            libsdl2-mixer-dev \
-            libsdl2-ttf-dev \
-            libportmidi-dev \
-            libswscale-dev \
-            libavformat-dev \
-            libavcodec-dev \
-            zlib1g-dev \
-            libgstreamer1.0-dev \
-            gstreamer1.0-plugins-base \
-            gstreamer1.0-plugins-good \
-            libsqlite3-dev \
-            libffi-dev \
-            libssl-dev
+            build-essential git python3-dev ffmpeg libsdl2-dev libsdl2-image-dev \
+            libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev libswscale-dev \
+            libavformat-dev libavcodec-dev zlib1g-dev libgstreamer1.0-dev \
+            gstreamer1.0-plugins-base gstreamer1.0-plugins-good libsqlite3-dev \
+            libffi-dev libssl-dev libbz2-dev libreadline-dev liblzma-dev \
+            libncursesw5-dev tk-dev libxml2-dev libxmlsec1-dev libossp-uuid-dev
 
-      - name: Install Buildozer
+      - name: Install Python tools
         run: |
-          pip install --user --upgrade buildozer
-          pip install --user --upgrade Cython==0.29.33
+          pip install --upgrade pip
+          pip install --user buildozer Cython==0.29.33 setuptools
 
       - name: Build with Buildozer
         run: |
           export PATH=$PATH:$HOME/.local/bin
-          # استخدام yes لإعطاء موافقة تلقائية على شروط SDK/NDK
+          # قبول التراخيص يدوياً قبل بدء البناء لضمان عدم حدوث Broken Pipe
+          mkdir -p ~/.android && touch ~/.android/repositories.cfg
+          # هذه الخطوة تجبر النظام على الموافقة على كل الشروط تلقائياً
           yes | buildozer android debug
+        env:
+          # تعيين المسارات لضمان وصول Buildozer للأدوات
+          ANDROID_SDK_HOME: /home/runner/.android
 
       - name: Upload APK Artifact
-        uses: actions/upload-artifact@v4 # هذا هو التحديث المطلوب لحل المشكلة (v4)
+        uses: actions/upload-artifact@v4
         with:
           name: SovereignTitan-Package
           path: bin/*.apk
