@@ -1,34 +1,36 @@
 import asyncio
 from core.cognitive_engine.concept_analyzer import analyze_game_concept
 from core.code_generator.architecture_builder import ArchitectureBuilder
+from core.learning_engine.market_researcher import MarketResearcher
 from core.experience_vault.lesson_database import ExperienceVault
-from utils.cleaner import factory_clean_up
 
-async def run_factory():
-    # 1. تهيئة الخزنة
-    vault = ExperienceVault()
+async def run_sovereign_cycle():
+    print("🛰️ Sovereign Titan v21: Research & Production Cycle Started.")
     
-    # 2. تشغيل المصنع
-    description = "لعبة بقاء في غابة موحشة للأندرويد"
+    # 1. البحث في الإنترنت (التعلم من السوق)
+    researcher = MarketResearcher()
+    trends = researcher.research_trends()
+    
+    # 2. إرسال التريندات للـ AI لتصميم لعبة "تكتسح السوق"
+    description = f"أريد لعبة أندرويد تجمع بين تريندات اليوم: {', '.join(trends)}"
+    print(f"🧠 AI is designing a game based on market trends...")
+    
     concept, path = await analyze_game_concept(description)
     
-    # 3. بناء الكود
+    # 3. بناء الكود وحفظ الخبرة
     builder = ArchitectureBuilder(path)
-    msg = builder.create_game_files()
-    print(msg)
+    builder.create_game_files()
     
-    # 4. حفظ التجربة في الخزنة (التعلم الذاتي)
+    vault = ExperienceVault()
     vault.store_experience(
         game_title=concept.get('game_title'),
         genre=concept.get('genre'),
         mechanics=concept.get('mechanics'),
-        code="Main KivyMD Layout",
-        lesson="Successfully integrated localized AI logic for mobile"
+        code="Trend-Based Logic",
+        lesson=f"Market research integrated: {trends[0]} is dominating."
     )
     
-    # 5. تنظيف النظام (بناءً على طلبك)
-    # يمكنك استدعاء factory_clean_up() هنا أو عند الحاجة
-    print("🚀 Cycle finished. Sovereign Titan is getting smarter.")
+    print(f"👑 Mission Accomplished: {concept.get('game_title')} is ready.")
 
 if __name__ == "__main__":
-    asyncio.run(run_factory())
+    asyncio.run(run_sovereign_cycle())
