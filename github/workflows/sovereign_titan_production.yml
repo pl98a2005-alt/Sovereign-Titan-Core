@@ -1,46 +1,18 @@
-name: Sovereign_Titan_Final_Success
-on: 
-  push:
-    branches: [ main ]
-  workflow_dispatch:
-
-permissions:
-  contents: write
+name: Sovereign_Titan_Final_Green
+on: [push, workflow_dispatch]
 
 jobs:
-  production:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - name: 📥 Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: 🐍 Setup Python
+      - uses: actions/checkout@v4
+      - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
-
-      - name: 📦 Install Dependencies
-        run: |
-          pip install requests beautifulsoup4 pyyaml kivymd kivy buildozer cython
-
-      - name: 🛰️ Run Sovereign Factory (Research & Design)
+      - name: Create Structure
+        run: mkdir -p concepts games vault core/config utils core/cognitive_engine
+      - name: Install Essential Deps
+        run: pip install requests beautifulsoup4 pyyaml
+      - name: Execute Sovereign Core
         run: python main.py
-
-      - name: 🛠️ Build Android APK
-        run: |
-          # بناء ملف APK سريع
-          if [ -f buildozer.spec ]; then
-            yes | buildozer -v android debug
-          else
-            echo "No spec file, skipping APK..."
-          fi
-        continue-on-error: true
-
-      - name: 👑 Upload Result
-        uses: actions/upload-artifact@v4
-        with:
-          name: Sovereign_Titan_Package
-          path: |
-            games/
-            concepts/
-            bin/*.apk
