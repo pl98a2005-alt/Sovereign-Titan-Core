@@ -1,24 +1,16 @@
-name: Build Sovereign Titan APK
-on: push
+name: Build Sovereign Titan v20
+on: [push]
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.9'
-      - name: System Deps
-        run: sudo apt-get update && sudo apt-get install -y build-essential git python3-dev ffmpeg libsdl2-dev libsqlite3-dev
-      - name: Install Buildozer
-        run: pip install --user buildozer Cython==0.29.33 setuptools
-      - name: Build
+      - name: Setup Factory
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libsqlite3-dev
+          pip install --user buildozer Cython==0.29.33 setuptools
+      - name: Build APK
         run: |
           export PATH=$PATH:$HOME/.local/bin
           yes | buildozer android debug
-      - name: Upload
-        uses: actions/upload-artifact@v4
-        with:
-          name: SovereignTitan-Package
-          path: bin/*.apk
