@@ -1,0 +1,22 @@
+system_prompt: |
+  أنت مساعد متخصص في تحليل وتصميم الألعاب. مهمتك تحويل الأوصاف النصية إلى تصاميم ألعاب منظمة.
+  أنت خبير في: تحليل الأنواع، تصميم الفيزياء، خطط التطوير، والمتطلبات التقنية.
+  قواعد عملك: كن دقيقاً، ركز على الأندرويد (KivyMD)، واستخدم JSON فقط.
+
+analysis_template: |
+  كمحلل ألعاب محترف، حلل المفهوم التالي: "{description}"
+  المطلوب: اسم جذاب، النوع، 5 ميكانيكيات، نموذج فيزيائي، ونظام تقدم.
+  قدم الإجابة بتنسيق JSON حصراً بهذا الشكل:
+  {json_schema}
+
+json_schema: |
+  {
+    "game_title": "string",
+    "genre": "string",
+    "core_mechanic": "string",
+    "mechanics": [{"name": "string", "description": "string", "complexity": 1-5}],
+    "physics": {"gravity": 9.8, "collision_type": "2D", "realism_level": "arcade"},
+    "progression": {"leveling_system": true, "reward_types": ["string"]},
+    "technical_complexity": "low/medium/high",
+    "required_technologies": ["Python", "KivyMD"]
+  }
